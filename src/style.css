@@ -211,3 +211,112 @@ pre.code {
   .page-header h1 { font-size: 30px; }
   .grid { grid-template-columns: 1fr; }
 }
+
+/* ── Interactive cards ─────────────────────────────────────────────────────── */
+
+:root {
+  --live: #10b981;
+  --live-bg: rgba(16, 185, 129, 0.08);
+  --live-border: rgba(16, 185, 129, 0.22);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --live: #34d399;
+    --live-bg: rgba(52, 211, 153, 0.07);
+    --live-border: rgba(52, 211, 153, 0.18);
+  }
+}
+
+.card--interactive .card-header {
+  background: var(--live-bg);
+  border-bottom-color: var(--live-border);
+}
+
+.card--interactive .friendly { color: var(--live); }
+
+.badge--live {
+  background: var(--live-bg);
+  color: var(--live);
+  border: 1px solid var(--live-border);
+}
+
+.demo-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 13px;
+  border-bottom: 1px solid var(--border);
+}
+
+.demo-input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text-h);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.demo-input:focus {
+  border-color: var(--live-border);
+  box-shadow: 0 0 0 3px var(--live-bg);
+}
+
+.demo-btn {
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 6px 13px;
+  border-radius: 6px;
+  background: var(--live-bg);
+  border: 1px solid var(--live-border);
+  color: var(--live);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.demo-btn:hover { background: var(--live-border); }
+.demo-btn:active { opacity: 0.75; }
+
+.demo-log {
+  min-height: 90px;
+  max-height: 170px;
+  overflow-y: auto;
+  padding: 8px 13px;
+}
+
+.log-empty {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text);
+  font-style: italic;
+  margin: 0;
+  line-height: 1.7;
+}
+
+.log-entry {
+  display: flex;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.75;
+}
+
+.log-time {
+  color: var(--text);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.log-value { color: var(--text-h); }
+
+.log-value.cancelled {
+  color: var(--text);
+  text-decoration: line-through;
+}
