@@ -231,6 +231,9 @@ function setupInteractiveDemos() {
 // ── render ─────────────────────────────────────────────────────────────────────
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
+<nav class="site-nav">
+  <a class="home-link" href="https://hansschenker.github.io">← hansschenker.github.io</a>
+</nav>
 <header class="page-header">
   <h1>RxJS — Human-Friendly Names</h1>
   <p>Every operator re-exported with a descriptive alias. Import from <code>src/index.ts</code>.</p>
@@ -345,6 +348,9 @@ ${section('Time-Based Operators — Interactive', 'Try these live. Each card wir
 
 ])}
 
-</main>`;
+</main>
+<footer class="site-footer">
+  <a href="https://hansschenker.github.io" class="footer-home">← hansschenker.github.io</a>
+</footer>`;
 
 setupInteractiveDemos();

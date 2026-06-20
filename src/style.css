@@ -47,6 +47,42 @@ body { margin: 0; }
   padding: 0 32px 96px;
 }
 
+/* ── Site nav ──────────────────────────────────────────────────────────────── */
+
+.site-nav {
+  padding: 14px 0 0;
+}
+
+.home-link {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--text);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.home-link:hover { color: var(--accent); }
+
+/* ── Site footer ───────────────────────────────────────────────────────────── */
+
+.site-footer {
+  margin-top: 80px;
+  padding: 24px 0 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: center;
+}
+
+.footer-home {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--text);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.footer-home:hover { color: var(--accent); }
+
 /* ── Header ────────────────────────────────────────────────────────────────── */
 
 .page-header {
