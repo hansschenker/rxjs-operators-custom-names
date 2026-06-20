@@ -1,0 +1,213 @@
+:root {
+  --text: #6b6375;
+  --text-h: #08060d;
+  --bg: #fff;
+  --border: #e5e4e7;
+  --code-bg: #f4f3ec;
+  --accent: #aa3bff;
+  --accent-bg: rgba(170, 59, 255, 0.07);
+  --accent-border: rgba(170, 59, 255, 0.25);
+  --output-bg: rgba(170, 59, 255, 0.04);
+  --async-bg: #fffbeb;
+  --async-text: #92400e;
+  --async-border: #fde68a;
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 16px/1.5 var(--sans);
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #9ca3af;
+    --text-h: #f3f4f6;
+    --bg: #0f1117;
+    --border: #2a2d3a;
+    --code-bg: #181b26;
+    --accent: #c084fc;
+    --accent-bg: rgba(192, 132, 252, 0.09);
+    --accent-border: rgba(192, 132, 252, 0.25);
+    --output-bg: rgba(192, 132, 252, 0.05);
+    --async-bg: rgba(253, 230, 138, 0.08);
+    --async-text: #fcd34d;
+    --async-border: rgba(253, 230, 138, 0.25);
+  }
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 32px 96px;
+}
+
+/* ── Header ────────────────────────────────────────────────────────────────── */
+
+.page-header {
+  text-align: center;
+  padding: 72px 0 56px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 60px;
+}
+
+.page-header h1 {
+  font-size: 44px;
+  font-weight: 600;
+  letter-spacing: -1.4px;
+  color: var(--text-h);
+  margin: 0 0 12px;
+}
+
+.page-header p {
+  font-size: 17px;
+  color: var(--text);
+  margin: 0;
+}
+
+.page-header code {
+  font-family: var(--mono);
+  font-size: 14px;
+  background: var(--code-bg);
+  padding: 2px 7px;
+  border-radius: 4px;
+  color: var(--text-h);
+}
+
+/* ── Sections ──────────────────────────────────────────────────────────────── */
+
+.section {
+  margin-bottom: 60px;
+}
+
+.section-header {
+  margin-bottom: 20px;
+}
+
+.section-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-h);
+  letter-spacing: -0.3px;
+  margin: 0 0 3px;
+}
+
+.section-header p {
+  font-size: 13px;
+  color: var(--text);
+  margin: 0;
+}
+
+/* ── Grid ──────────────────────────────────────────────────────────────────── */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 10px;
+}
+
+/* ── Card ──────────────────────────────────────────────────────────────────── */
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 13px;
+  background: var(--accent-bg);
+  border-bottom: 1px solid var(--accent-border);
+}
+
+.friendly {
+  font-family: var(--mono);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.badges {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.badge {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: var(--border);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.badge--async {
+  background: var(--async-bg);
+  color: var(--async-text);
+  border: 1px solid var(--async-border);
+}
+
+pre.code {
+  margin: 0;
+  padding: 11px 13px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.7;
+  background: var(--code-bg);
+  color: var(--text-h);
+  overflow-x: auto;
+  flex: 1;
+  border-bottom: 1px solid var(--border);
+}
+
+.output {
+  padding: 8px 13px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-h);
+  background: var(--output-bg);
+}
+
+.output + .output {
+  border-top: 1px solid var(--border);
+}
+
+.label {
+  color: var(--text);
+  font-size: 10.5px;
+  margin-right: 4px;
+  user-select: none;
+}
+
+.async-note {
+  padding: 8px 13px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--async-text);
+  background: var(--async-bg);
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  #app { padding: 0 16px 64px; }
+  .page-header { padding: 48px 0 36px; }
+  .page-header h1 { font-size: 30px; }
+  .grid { grid-template-columns: 1fr; }
+}
