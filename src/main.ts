@@ -1,6 +1,8 @@
 import './style.css';
 import { of, EMPTY, throwError, Observable, fromEvent, interval, timer, Subject } from 'rxjs';
 import {
+  emitValues, streamFrom, emitEvery, emitAfterDelay, listenTo,
+  lazyStream, emitNothing, failWith, emitRange, streamIf, generateSequence,
   transformWith, accumulate, withPrevious, replaceWith, collectN, expandRecursively,
   accumulateConcurrently, pickProperty,
   keepIf, limitTo, dropFirst, lastN, stopWhenNot, skipDuplicates, uniqueValues, atIndex,
@@ -94,6 +96,16 @@ const r_combineAllLatest = run(of(of(1), of(2), of(3)).pipe(combineAllLatest()))
 const r_withTimestamp = run(of('ping').pipe(withTimestamp()));
 const tapLog: number[] = [];
 const r_sideEffect = run(of(1, 2, 3).pipe(sideEffect(x => tapLog.push(x)), transformWith(x => x * 10)));
+// creation
+const r_emitValues       = run(emitValues(1, 2, 3));
+const r_streamFrom       = run(streamFrom([1, 2, 3]));
+const r_emitRange        = run(emitRange(1, 5));
+const r_emitNothing      = run(emitNothing());
+const r_failWith         = run(failWith(() => new Error('oops')).pipe(handleError(() => emitValues('rescued'))));
+const r_lazyStream       = run(lazyStream(() => emitValues(1, 2, 3)));
+const r_streamIf_t       = run(streamIf(() => true,  emitValues('yes'), emitValues('no')));
+const r_streamIf_f       = run(streamIf(() => false, emitValues('yes'), emitValues('no')));
+const r_generateSequence = run(generateSequence(0, (x: number) => x < 5, (x: number) => x + 1));
 
 // ── card builders ──────────────────────────────────────────────────────────────
 
@@ -123,6 +135,21 @@ function interactiveCard(friendly: string, original: string, controls: string, c
   <div class="demo-controls">${controls}</div>
   <pre class="code">${esc(code)}</pre>
   <div class="demo-log" id="${logId}"><p class="log-empty">waiting…</p></div>
+</div>`;
+}
+
+function asyncCard(friendly: string, original: string, code: string, note: string): string {
+  return `
+<div class="card">
+  <div class="card-header">
+    <span class="friendly">${friendly}</span>
+    <span class="badges">
+      <span class="badge">${original}</span>
+      <span class="badge badge--async">● async</span>
+    </span>
+  </div>
+  <pre class="code">${esc(code)}</pre>
+  <div class="async-note">${note}</div>
 </div>`;
 }
 
@@ -401,6 +428,35 @@ function setupInteractiveDemos() {
       return timer(1500).pipe(transformWith(() => n));
     })
   ).subscribe(n => appendLog('l-merge', `✓ task ${n} done`));
+
+  // 8. emitEvery — start/stop an interval
+  const everyStart = document.getElementById('i-every-start')!;
+  const everyStop  = document.getElementById('i-every-stop')!;
+  let every$ = new Subject<void>();
+  let everyRunning = false;
+  fromEvent(everyStart, 'click').subscribe(() => {
+    if (everyRunning) return;
+    everyRunning = true;
+    every$ = new Subject<void>();
+    appendLog('l-every', 'started');
+    emitEvery(1000).pipe(stopWhen(every$)).subscribe({
+      next: n => appendLog('l-every', `tick ${n + 1}`),
+      complete: () => { everyRunning = false; appendLog('l-every', 'stopped ✓'); },
+    });
+  });
+  fromEvent(everyStop, 'click').subscribe(() => { if (everyRunning) every$.next(); });
+
+  // 9. emitAfterDelay — fires once 1 s after click; switchMap cancels if clicked again
+  const timerBtn = document.getElementById('i-timer')!;
+  fromEvent(timerBtn, 'click').pipe(
+    transformSwitching(() => emitAfterDelay(1000))
+  ).subscribe(() => appendLog('l-timer', 'fired after 1 s ✓'));
+
+  // 10. listenTo — count clicks on a dedicated button
+  const listenBtn = document.getElementById('i-listen')!;
+  listenTo(listenBtn, 'click').pipe(
+    transformWith((_, i) => `click #${i + 1}`)
+  ).subscribe(msg => appendLog('l-listen', msg));
 }
 
 // ── render ─────────────────────────────────────────────────────────────────────
@@ -416,6 +472,39 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 <main>
 
 ${referenceList()}
+
+${section('Creation', 'Create a new observable from values, sequences, events, or async sources.', [
+  card('emitValues', 'of',
+    `emitValues(1, 2, 3)`, r_emitValues),
+  card('streamFrom', 'from',
+    `streamFrom([1, 2, 3])`, r_streamFrom),
+  card('emitRange', 'range',
+    `emitRange(1, 5)`, r_emitRange),
+  card('emitNothing', 'empty',
+    `emitNothing()\n// completes with zero emissions`, r_emitNothing),
+  card('failWith', 'throwError',
+    `failWith(() => new Error('oops')).pipe(\n  handleError(() => emitValues('rescued'))\n)`, r_failWith),
+  card('lazyStream', 'defer',
+    `lazyStream(() => emitValues(1, 2, 3))\n// factory runs fresh per subscriber`, r_lazyStream),
+  card('streamIf', 'iif',
+    `streamIf(\n  () => true,\n  emitValues('yes'),\n  emitValues('no')\n)`,
+    r_streamIf_t,
+    `<span class="label">false →</span>${esc(fmt(r_streamIf_f))}`),
+  card('generateSequence', 'generate',
+    `generateSequence(\n  0, x => x < 5, x => x + 1\n)`, r_generateSequence),
+  asyncCard('fetchHttp', 'ajax',
+    `fetchHttp('/api/users').pipe(\n  transformWith(res => res.response)\n)`,
+    'Makes an HTTP request and emits the parsed response. Requires a real browser or Node.js HTTP environment.'),
+  asyncCard('fromEventHandlers', 'fromEventPattern',
+    `fromEventHandlers(\n  h => document.addEventListener('click', h),\n  h => document.removeEventListener('click', h)\n)`,
+    'Creates a stream from any event API using explicit add/remove handler functions — useful when fromEvent doesn\'t cover the API.'),
+  asyncCard('fromCallback', 'bindCallback',
+    `const getData = fromCallback(\n  (cb) => setTimeout(() => cb('hello'), 100)\n);\ngetData()`,
+    'Wraps a callback-style function (last arg is cb) into an observable factory callable with the same arguments.'),
+  asyncCard('fromNodeCallback', 'bindNodeCallback',
+    `const readFile$ = fromNodeCallback(fs.readFile);\nreadFile$('data.txt', 'utf-8')`,
+    'Wraps a Node.js error-first callback (err, result) into an observable factory — emits result or errors on err.'),
+])}
 
 ${section('Transformation', 'Apply functions to reshape, accumulate, or expand emitted values.', [
   card('transformWith', 'map',       `of(1, 2, 3).pipe(\n  transformWith(x => x * 2)\n)`,              r_transformWith),
@@ -536,6 +625,22 @@ ${section('Time-Based Operators — Interactive', 'Try these live. Each card wir
     `<button class="demo-btn" id="i-merge">Add Task</button>`,
     `fromEvent(btn, 'click').pipe(\n  transformConcurrently(() => task$(1500))\n)`,
     'l-merge'),
+
+  interactiveCard('emitEvery', 'interval',
+    `<button class="demo-btn" id="i-every-start">▶ Start</button>
+     <button class="demo-btn" id="i-every-stop">■ Stop</button>`,
+    `emitEvery(1000).pipe(\n  stopWhen(stop$)\n)`,
+    'l-every'),
+
+  interactiveCard('emitAfterDelay', 'timer',
+    `<button class="demo-btn" id="i-timer">Fire after 1s</button>`,
+    `fromEvent(btn, 'click').pipe(\n  transformSwitching(() =>\n    emitAfterDelay(1000)\n  )\n)`,
+    'l-timer'),
+
+  interactiveCard('listenTo', 'fromEvent',
+    `<button class="demo-btn" id="i-listen">Click me!</button>`,
+    `listenTo(btn, 'click').pipe(\n  transformWith((_, i) => \`click #\${i + 1}\`)\n)`,
+    'l-listen'),
 
 ])}
 
