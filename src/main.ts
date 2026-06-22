@@ -2,13 +2,15 @@ import './style.css';
 import { of, EMPTY, throwError, Observable, fromEvent, interval, timer, Subject } from 'rxjs';
 import {
   transformWith, accumulate, withPrevious, replaceWith, collectN, expandRecursively,
+  accumulateConcurrently, pickProperty,
   keepIf, limitTo, dropFirst, lastN, stopWhenNot, skipDuplicates, uniqueValues, atIndex,
-  runInSequence, waitForAll, pairEmissions, splitBy,
-  prependWith, joinSequentially, pairWithLatest,
+  takeFirst, takeLast, dropLast, dropWhile, exactlyOne, suppressValues, skipDuplicatesBy,
+  latestFromAll, runInSequence, waitForAll, pairEmissions, splitBy,
+  prependWith, joinSequentially, pairWithLatest, joinConcurrently, combineAllLatest,
   handleError, tryAgain,
   foldInto, countValues, maximum, minimum, collectAll,
   orDefault, allMatch, firstMatch, firstMatchIndex, hasNoValues,
-  sideEffect,
+  sideEffect, withTimestamp,
   afterSilenceOf, limitRateTo, stopWhen, delayBy,
   transformSwitching, transformSequentially, transformConcurrently,
 } from './index';
@@ -72,6 +74,24 @@ const r_allMatch        = run(of(2, 4, 6, 8).pipe(allMatch(x => x % 2 === 0)));
 const r_firstMatch      = run(of(1, 2, 3, 4, 5).pipe(firstMatch(x => x > 3)));
 const r_firstMatchIndex = run(of(1, 2, 3, 4, 5).pipe(firstMatchIndex(x => x > 3)));
 const r_hasNoValues     = run(EMPTY.pipe(hasNoValues()));
+// new transformation
+const r_accumulateConcurrently = run(of(1, 2, 3).pipe(accumulateConcurrently((acc, n) => of(acc + n), 0)));
+const r_pickProperty = run(of({ name: 'Alice', age: 30 }, { name: 'Bob', age: 25 }).pipe(pickProperty('name' as any)));
+// new filtering
+const r_takeFirst      = run(of(5, 10, 15, 20).pipe(takeFirst()));
+const r_takeLast       = run(of(5, 10, 15, 20).pipe(takeLast()));
+const r_dropLast       = run(of(1, 2, 3, 4, 5).pipe(dropLast(2)));
+const r_dropWhile      = run(of(1, 2, 3, 4, 5, 1).pipe(dropWhile(x => x < 4)));
+const r_exactlyOne     = run(of(1, 2, 3, 4, 5).pipe(exactlyOne(x => x === 3)));
+const r_suppressValues = run(of(1, 2, 3).pipe(suppressValues()));
+const r_skipDuplicatesBy = run(of({ k: 'x', v: 1 }, { k: 'x', v: 2 }, { k: 'y', v: 3 }).pipe(skipDuplicatesBy('k')));
+// new join creation
+const r_latestFromAll = run(latestFromAll([of(1), of(2), of(3)]));
+// new join
+const r_joinConcurrently = run(of(of(1, 2), of(3, 4)).pipe(joinConcurrently()));
+const r_combineAllLatest = run(of(of(1), of(2), of(3)).pipe(combineAllLatest()));
+// new utility
+const r_withTimestamp = run(of('ping').pipe(withTimestamp()));
 const tapLog: number[] = [];
 const r_sideEffect = run(of(1, 2, 3).pipe(sideEffect(x => tapLog.push(x)), transformWith(x => x * 10)));
 
@@ -382,6 +402,8 @@ ${section('Transformation', 'Apply functions to reshape, accumulate, or expand e
   card('replaceWith',  'mapTo',      `of('a', 'b', 'c').pipe(\n  replaceWith('x')\n)`,                r_replaceWith),
   card('collectN',     'bufferCount',`of(1, 2, 3, 4, 5, 6).pipe(\n  collectN(2)\n)`,                  r_collectN),
   card('expandRecursively', 'expand',`of(1).pipe(\n  expandRecursively(n => n >= 8 ? EMPTY : of(n * 2))\n)`, r_expandRecursively),
+  card('accumulateConcurrently', 'mergeScan', `of(1, 2, 3).pipe(\n  accumulateConcurrently(\n    (acc, n) => of(acc + n), 0\n  )\n)`, r_accumulateConcurrently),
+  card('pickProperty', 'pluck', `of({name:'Alice'}, {name:'Bob'}).pipe(\n  pickProperty('name')\n)`, r_pickProperty),
 ])}
 
 ${section('Filtering', 'Decide which values pass through and which are suppressed.', [
@@ -392,7 +414,14 @@ ${section('Filtering', 'Decide which values pass through and which are suppresse
   card('stopWhenNot',   'takeWhile',           `of(1, 2, 3, 4, 5).pipe(\n  stopWhenNot(x => x < 4)\n)`,  r_stopWhenNot),
   card('skipDuplicates','distinctUntilChanged',`of(1, 1, 2, 2, 3, 1).pipe(\n  skipDuplicates()\n)`,      r_skipDuplicates),
   card('uniqueValues',  'distinct',            `of(1, 2, 1, 3, 2, 3).pipe(\n  uniqueValues()\n)`,        r_uniqueValues),
-  card('atIndex',       'elementAt',           `of('a', 'b', 'c', 'd').pipe(\n  atIndex(2)\n)`,          r_atIndex),
+  card('atIndex',          'elementAt',              `of('a', 'b', 'c', 'd').pipe(\n  atIndex(2)\n)`,                         r_atIndex),
+  card('takeFirst',        'first',                  `of(5, 10, 15, 20).pipe(\n  takeFirst()\n)`,                               r_takeFirst),
+  card('takeLast',         'last',                   `of(5, 10, 15, 20).pipe(\n  takeLast()\n)`,                                r_takeLast),
+  card('dropLast',         'skipLast',               `of(1, 2, 3, 4, 5).pipe(\n  dropLast(2)\n)`,                               r_dropLast),
+  card('dropWhile',        'skipWhile',              `of(1, 2, 3, 4, 5, 1).pipe(\n  dropWhile(x => x < 4)\n)`,                 r_dropWhile),
+  card('exactlyOne',       'single',                 `of(1, 2, 3, 4, 5).pipe(\n  exactlyOne(x => x === 3)\n)`,                 r_exactlyOne),
+  card('suppressValues',   'ignoreElements',         `of(1, 2, 3).pipe(\n  suppressValues()\n)`,                               r_suppressValues),
+  card('skipDuplicatesBy', 'distinctUntilKeyChanged',`of({k:'x',v:1},{k:'x',v:2},{k:'y',v:3})\n  .pipe(skipDuplicatesBy('k'))`,r_skipDuplicatesBy),
 ])}
 
 ${section('Join Creation', 'Combine multiple source observables into one stream.', [
@@ -405,12 +434,16 @@ ${section('Join Creation', 'Combine multiple source observables into one stream.
   card('splitBy', 'partition',
     `const [evens, odds] = splitBy(\n  of(1, 2, 3, 4, 5),\n  x => x % 2 === 0\n)`,
     r_splitByEvens, `<span class="label">odds  →</span>${esc(fmt(r_splitByOdds))}`),
+  card('latestFromAll', 'combineLatest',
+    `latestFromAll([\n  of(1), of(2), of(3)\n])`, r_latestFromAll),
 ])}
 
 ${section('Join (Pipeable)', 'Combine the source stream with other observables mid-pipeline.', [
   card('prependWith',    'startWith',    `of(3, 4, 5).pipe(\n  prependWith(1, 2)\n)`,           r_prependWith),
   card('joinSequentially','concatAll',   `of(of(1, 2), of(3, 4)).pipe(\n  joinSequentially()\n)`, r_joinSequentially),
-  card('pairWithLatest', 'withLatestFrom',`of(1, 2, 3).pipe(\n  pairWithLatest(of(10))\n)`,     r_pairWithLatest),
+  card('pairWithLatest',   'withLatestFrom', `of(1, 2, 3).pipe(\n  pairWithLatest(of(10))\n)`,              r_pairWithLatest),
+  card('joinConcurrently', 'mergeAll',      `of(of(1, 2), of(3, 4)).pipe(\n  joinConcurrently()\n)`,         r_joinConcurrently),
+  card('combineAllLatest', 'combineLatestAll', `of(of(1), of(2), of(3)).pipe(\n  combineAllLatest()\n)`,     r_combineAllLatest),
 ])}
 
 ${section('Error Handling', 'Catch errors and decide whether to recover or retry.', [
@@ -438,6 +471,7 @@ ${section('Conditional & Boolean', 'Evaluate a condition against the whole seque
 ])}
 
 ${section('Utility', 'Side effects and observable lifecycle helpers.', [
+  card('withTimestamp', 'timestamp', `of('ping').pipe(\n  withTimestamp()\n)`, r_withTimestamp),
   card('sideEffect', 'tap',
     `of(1, 2, 3).pipe(\n  sideEffect(x => log.push(x)),\n  transformWith(x => x * 10)\n)`,
     r_sideEffect, `<span class="label">logged →</span>${esc(fmt(tapLog))}`),
