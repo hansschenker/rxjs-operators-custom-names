@@ -1,3 +1,4 @@
+export * from './operators/creation';
 export * from './operators/joinCreation';
 export * from './operators/transformation';
 export * from './operators/filtering';

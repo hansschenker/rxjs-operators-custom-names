@@ -1,5 +1,67 @@
 # Goal:  Rewrite Rxjs Operator names into custom human readable sensible names
 
+Creation Operators
+
+## of user friendly description - creates an observable that emits a fixed set of values synchronously then completes
+   of user friendly short name - emitValues
+   of user friendly name rationale - "Emit Values" describes creating a stream from literal values passed inline
+
+## from user friendly description - converts an array, iterable, Promise, or observable-like into an observable
+   from user friendly short name - streamFrom
+   from user friendly name rationale - "Stream From" converts any array, iterable, or Promise into an observable stream
+
+## interval user friendly description - emits an incrementing number at a fixed time interval
+   interval user friendly short name - emitEvery
+   interval user friendly name rationale - "Emit Every" describes the periodic tick at a fixed interval
+
+## timer user friendly description - emits once after a delay, then optionally at a regular interval
+   timer user friendly short name - emitAfterDelay
+   timer user friendly name rationale - "Emit After Delay" captures the deferred first emission; an interval argument adds recurrence
+
+## fromEvent user friendly description - creates an observable from DOM or Node.js event listeners
+   fromEvent user friendly short name - listenTo
+   fromEvent user friendly name rationale - "Listen To" captures the event listener mental model in a single phrase
+
+## fromEventPattern user friendly description - creates an observable using custom add/remove handler functions for any event API
+   fromEventPattern user friendly short name - fromEventHandlers
+   fromEventPattern user friendly name rationale - "From Event Handlers" describes supplying explicit add/remove handler functions
+
+## defer user friendly description - creates a new observable for each subscriber by calling a factory function at subscription time
+   defer user friendly short name - lazyStream
+   defer user friendly name rationale - "Lazy Stream" describes per-subscriber deferred creation — the factory runs fresh each time
+
+## empty user friendly description - creates an observable that completes immediately without emitting any value
+   empty user friendly short name - emitNothing
+   empty user friendly name rationale - "Emit Nothing" describes completing immediately with zero values
+
+## throwError user friendly description - creates an observable that immediately errors with a given value
+   throwError user friendly short name - failWith
+   throwError user friendly name rationale - "Fail With" describes creating a stream that immediately errors with a given value
+
+## range user friendly description - emits a sequential range of integers starting at a given value
+   range user friendly short name - emitRange
+   range user friendly name rationale - "Emit Range" describes generating a sequential numeric range as a stream
+
+## iif user friendly description - subscribes to one of two observables depending on whether a condition is true at subscription time
+   iif user friendly short name - streamIf
+   iif user friendly name rationale - "Stream If" reads as a conditional: use one stream if true, another if false
+
+## generate user friendly description - emits values produced by a loop-like generator with initial state, condition, and step functions
+   generate user friendly short name - generateSequence
+   generate user friendly name rationale - "Generate Sequence" describes loop-based value generation driven by a state function
+
+## ajax user friendly description - creates an observable that makes an HTTP request and emits the response
+   ajax user friendly short name - fetchHttp
+   ajax user friendly name rationale - "Fetch Http" describes making an HTTP request as a stream in plain language
+
+## bindCallback user friendly description - wraps a callback-style function into an observable factory
+   bindCallback user friendly short name - fromCallback
+   bindCallback user friendly name rationale - "From Callback" describes wrapping a callback-style API into an observable factory
+
+## bindNodeCallback user friendly description - wraps a Node.js error-first callback function into an observable factory
+   bindNodeCallback user friendly short name - fromNodeCallback
+   bindNodeCallback user friendly name rationale - "From Node Callback" specifies the Node.js error-first (err, result) callback convention
+
 ## map user friendly description - apply a transformation function to each element in the list
    map user friendly short name - transformWith
    map user friendly name rationale - "Transform" is the general term for changing the shape or type of a value; "With" implies supplying a function

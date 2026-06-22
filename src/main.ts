@@ -140,6 +140,22 @@ function section(title: string, subtitle: string, cards: string[]): string {
 // ── operator reference data ───────────────────────────────────────────────────
 
 const OPERATORS: Array<{ cat: string; custom: string; original: string; rationale: string }> = [
+  // ── Creation ────────────────────────────────────────────────────────────────
+  { cat: 'Creation', custom: 'emitValues',       original: 'of',               rationale: '"Emit Values" describes creating a stream from literal values passed inline' },
+  { cat: 'Creation', custom: 'streamFrom',        original: 'from',             rationale: '"Stream From" converts any array, iterable, or Promise into an observable stream' },
+  { cat: 'Creation', custom: 'emitEvery',         original: 'interval',         rationale: '"Emit Every" describes the periodic tick at a fixed interval' },
+  { cat: 'Creation', custom: 'emitAfterDelay',    original: 'timer',            rationale: '"Emit After Delay" captures the deferred first emission; an interval argument adds recurrence' },
+  { cat: 'Creation', custom: 'listenTo',          original: 'fromEvent',        rationale: '"Listen To" captures the event listener mental model in a single phrase' },
+  { cat: 'Creation', custom: 'fromEventHandlers', original: 'fromEventPattern', rationale: '"From Event Handlers" describes supplying explicit add/remove handler functions' },
+  { cat: 'Creation', custom: 'lazyStream',        original: 'defer',            rationale: '"Lazy Stream" describes per-subscriber deferred creation — the factory runs fresh each time' },
+  { cat: 'Creation', custom: 'emitNothing',       original: 'empty',            rationale: '"Emit Nothing" describes completing immediately with zero values' },
+  { cat: 'Creation', custom: 'failWith',          original: 'throwError',       rationale: '"Fail With" describes creating a stream that immediately errors with a given value' },
+  { cat: 'Creation', custom: 'emitRange',         original: 'range',            rationale: '"Emit Range" describes generating a sequential numeric range as a stream' },
+  { cat: 'Creation', custom: 'streamIf',          original: 'iif',              rationale: '"Stream If" reads as a conditional: use one stream if true, another if false' },
+  { cat: 'Creation', custom: 'generateSequence',  original: 'generate',         rationale: '"Generate Sequence" describes loop-based value generation driven by a state function' },
+  { cat: 'Creation', custom: 'fetchHttp',         original: 'ajax',             rationale: '"Fetch Http" describes making an HTTP request as a stream in plain language' },
+  { cat: 'Creation', custom: 'fromCallback',      original: 'bindCallback',     rationale: '"From Callback" describes wrapping a callback-style API into an observable factory' },
+  { cat: 'Creation', custom: 'fromNodeCallback',  original: 'bindNodeCallback', rationale: '"From Node Callback" specifies the Node.js error-first (err, result) callback convention' },
   // ── Transformation ──────────────────────────────────────────────────────────
   { cat: 'Transformation', custom: 'transformWith',          original: 'map',           rationale: '"Transform" is the general term for changing shape or type; "With" implies supplying a function' },
   { cat: 'Transformation', custom: 'collectUntilSignal',     original: 'buffer',        rationale: '"Collect" describes accumulation; "Until Signal" clarifies what triggers the batch flush' },
@@ -267,7 +283,7 @@ function referenceList(): string {
 <section class="section">
   <div class="section-header">
     <h2>All Operators — Name Reference</h2>
-    <p>96 RxJS operators with human-friendly aliases and the rationale for each chosen name.</p>
+    <p>111 RxJS operators with human-friendly aliases and the rationale for each chosen name.</p>
   </div>
   <div class="ref-layout">
     <nav class="ref-nav">${navBtns}</nav>
