@@ -249,6 +249,9 @@ const OPERATORS: Array<{ cat: string; custom: string; original: string; rational
 
 function referenceList(): string {
   const cats = [...new Set(OPERATORS.map(o => o.cat))];
+  const navBtns = cats.map(cat =>
+    `<button class="ref-nav-btn" data-cat="${cat}">${cat}</button>`
+  ).join('');
   const rows = cats.map(cat => {
     const items = OPERATORS
       .filter(o => o.cat === cat)
@@ -258,7 +261,7 @@ function referenceList(): string {
         <span class="op-original">${o.original}</span>
         <span class="op-rationale">${o.rationale}</span>
       </div>`).join('');
-    return `<div class="op-cat">${cat}</div>${items}`;
+    return `<div class="op-cat" data-cat="${cat}">${cat}</div>${items}`;
   }).join('');
   return `
 <section class="section">
@@ -266,7 +269,10 @@ function referenceList(): string {
     <h2>All Operators — Name Reference</h2>
     <p>96 RxJS operators with human-friendly aliases and the rationale for each chosen name.</p>
   </div>
-  <div class="op-list">${rows}</div>
+  <div class="ref-layout">
+    <nav class="ref-nav">${navBtns}</nav>
+    <div class="op-list">${rows}</div>
+  </div>
 </section>`;
 }
 
@@ -523,3 +529,39 @@ ${section('Time-Based Operators — Interactive', 'Try these live. Each card wir
 </footer>`;
 
 setupInteractiveDemos();
+setupRefNav();
+
+function setupRefNav() {
+  const opList = document.querySelector<HTMLElement>('.op-list')!;
+  const btns = Array.from(document.querySelectorAll<HTMLButtonElement>('.ref-nav-btn'));
+
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = opList.querySelector<HTMLElement>(`.op-cat[data-cat="${btn.dataset.cat}"]`);
+      if (!target) return;
+      const top = target.getBoundingClientRect().top - opList.getBoundingClientRect().top + opList.scrollTop;
+      opList.scrollTo({ top, behavior: 'smooth' });
+      setActive(btn.dataset.cat!);
+    });
+  });
+
+  function setActive(cat: string) {
+    btns.forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+  }
+
+  // Update active category as the list scrolls
+  const observer = new IntersectionObserver(
+    entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setActive((entry.target as HTMLElement).dataset.cat!);
+        }
+      });
+    },
+    { root: opList, threshold: 0, rootMargin: '0px 0px -88% 0px' }
+  );
+
+  opList.querySelectorAll<HTMLElement>('.op-cat').forEach(el => observer.observe(el));
+  // Initialise first category as active
+  setActive(btns[0]?.dataset.cat ?? '');
+}

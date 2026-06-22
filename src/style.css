@@ -359,11 +359,58 @@ pre.code {
 
 /* ── Operator reference list ────────────────────────────────────────────────── */
 
-.op-list {
+.ref-layout {
+  display: flex;
   border: 1px solid var(--border);
   border-radius: 10px;
+  overflow: hidden;
+}
+
+.ref-nav {
+  width: 192px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
   overflow-y: auto;
   max-height: 560px;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0;
+  background: var(--code-bg);
+}
+
+.ref-nav-btn {
+  background: none;
+  border: none;
+  border-left: 2px solid transparent;
+  text-align: left;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-family: var(--sans);
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.12s, background 0.12s;
+}
+
+.ref-nav-btn:hover {
+  color: var(--text-h);
+  background: var(--accent-bg);
+}
+
+.ref-nav-btn.active {
+  color: var(--accent);
+  font-weight: 600;
+  background: var(--accent-bg);
+  border-left-color: var(--accent);
+}
+
+.op-list {
+  overflow-y: auto;
+  max-height: 560px;
+  flex: 1;
+  min-width: 0;
 }
 
 .op-cat {
