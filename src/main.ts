@@ -117,6 +117,139 @@ function section(title: string, subtitle: string, cards: string[]): string {
 </section>`;
 }
 
+// ── operator reference data ───────────────────────────────────────────────────
+
+const OPERATORS: Array<{ cat: string; custom: string; original: string; rationale: string }> = [
+  // ── Transformation ──────────────────────────────────────────────────────────
+  { cat: 'Transformation', custom: 'transformWith',          original: 'map',           rationale: '"Transform" is the general term for changing shape or type; "With" implies supplying a function' },
+  { cat: 'Transformation', custom: 'collectUntilSignal',     original: 'buffer',        rationale: '"Collect" describes accumulation; "Until Signal" clarifies what triggers the batch flush' },
+  { cat: 'Transformation', custom: 'collectN',               original: 'bufferCount',   rationale: '"Collect N" is a minimal description of gathering a fixed number of values' },
+  { cat: 'Transformation', custom: 'collectForDuration',     original: 'bufferTime',    rationale: '"For Duration" makes the time-window nature explicit' },
+  { cat: 'Transformation', custom: 'collectBetweenSignals',  original: 'bufferToggle',  rationale: '"Between Signals" precisely describes the open/close collection boundaries' },
+  { cat: 'Transformation', custom: 'collectUntilFactory',    original: 'bufferWhen',    rationale: '"Factory" signals a function that generates the closing observable on demand' },
+  { cat: 'Transformation', custom: 'transformSequentially',  original: 'concatMap',     rationale: '"Sequentially" captures one-at-a-time, contrasting directly with transformConcurrently' },
+  { cat: 'Transformation', custom: 'switchToSequentially',   original: 'concatMapTo',   rationale: '"Switch To" implies replacing values; "Sequentially" adds the ordering guarantee' },
+  { cat: 'Transformation', custom: 'ignoreWhileBusy',        original: 'exhaust',       rationale: '"Ignore While Busy" captures drop-new-while-current-runs in plain language' },
+  { cat: 'Transformation', custom: 'transformIfNotBusy',     original: 'exhaustMap',    rationale: '"If Not Busy" makes conditional subscription immediately explicit' },
+  { cat: 'Transformation', custom: 'expandRecursively',      original: 'expand',        rationale: '"Recursively" describes the fan-out growth; the operator calls itself on its output' },
+  { cat: 'Transformation', custom: 'groupInto',              original: 'groupBy',       rationale: '"Group Into" describes collecting values into named buckets by key' },
+  { cat: 'Transformation', custom: 'replaceWith',            original: 'mapTo',         rationale: '"Replace With" describes swapping every value for a constant, unlike map\'s transform function' },
+  { cat: 'Transformation', custom: 'transformConcurrently',  original: 'mergeMap',      rationale: '"Concurrently" contrasts directly with transformSequentially' },
+  { cat: 'Transformation', custom: 'mergeInto',              original: 'mergeMapTo',    rationale: '"Merge Into" describes funneling every emission into the same shared stream' },
+  { cat: 'Transformation', custom: 'accumulateConcurrently', original: 'mergeScan',     rationale: 'Combines running-total (accumulate) with concurrent inner observable execution' },
+  { cat: 'Transformation', custom: 'withPrevious',           original: 'pairwise',      rationale: '"With Previous" describes the paired (current, prior) emission in plain language' },
+  { cat: 'Transformation', custom: 'pickProperty',           original: 'pluck',         rationale: '"Pick" is a familiar term for selecting one; "Property" makes the key context explicit' },
+  { cat: 'Transformation', custom: 'accumulate',             original: 'scan',          rationale: '"Accumulate" is the general term for building a running result over time' },
+  { cat: 'Transformation', custom: 'accumulateSwitching',    original: 'switchScan',    rationale: '"Switching" distinguishes from scan: the previous inner observable is cancelled' },
+  { cat: 'Transformation', custom: 'transformSwitching',     original: 'switchMap',     rationale: '"Switching" captures cancellation of the prior inner observable on each new value' },
+  { cat: 'Transformation', custom: 'switchTo',               original: 'switchMapTo',   rationale: '"Switch To" describes jumping to the same static observable, discarding the previous' },
+  { cat: 'Transformation', custom: 'windowUntilSignal',      original: 'window',        rationale: '"Window" kept for domain familiarity; "Until Signal" identifies the closing trigger' },
+  { cat: 'Transformation', custom: 'windowOfN',              original: 'windowCount',   rationale: '"Of N" concisely states the fixed-size nature, mirroring collectN' },
+  { cat: 'Transformation', custom: 'windowForDuration',      original: 'windowTime',    rationale: '"For Duration" mirrors collectForDuration, consistent across window and buffer families' },
+  { cat: 'Transformation', custom: 'windowBetweenSignals',   original: 'windowToggle',  rationale: '"Between Signals" mirrors collectBetweenSignals, consistent across toggle variants' },
+  { cat: 'Transformation', custom: 'windowUntilFactory',     original: 'windowWhen',    rationale: '"Until Factory" mirrors collectUntilFactory, signaling a per-window closing function' },
+  // ── Filtering ───────────────────────────────────────────────────────────────
+  { cat: 'Filtering', custom: 'keepIf',               original: 'filter',                  rationale: '"Keep" states the positive intent; "If" makes the condition explicit' },
+  { cat: 'Filtering', custom: 'emitLatestAfterSignal', original: 'audit',                  rationale: '"Latest After Signal" describes exactly which value is emitted and when' },
+  { cat: 'Filtering', custom: 'emitLatestAfterDelay',  original: 'auditTime',              rationale: '"After Delay" replaces "Signal" with a fixed duration' },
+  { cat: 'Filtering', custom: 'afterSilence',          original: 'debounce',               rationale: '"After Silence" captures the required pause before a value is released' },
+  { cat: 'Filtering', custom: 'afterSilenceOf',        original: 'debounceTime',           rationale: '"Of" suggests a measurable duration, making the fixed-time nature explicit' },
+  { cat: 'Filtering', custom: 'uniqueValues',          original: 'distinct',               rationale: '"Unique" is the plain-language word for values never seen before' },
+  { cat: 'Filtering', custom: 'skipDuplicates',        original: 'distinctUntilChanged',   rationale: '"Skip Duplicates" describes the adjacent-equality check in one phrase' },
+  { cat: 'Filtering', custom: 'skipDuplicatesBy',      original: 'distinctUntilKeyChanged',rationale: '"By" indicates a specific key is used for comparison' },
+  { cat: 'Filtering', custom: 'atIndex',               original: 'elementAt',              rationale: '"At Index" uses array-access language every developer already knows' },
+  { cat: 'Filtering', custom: 'takeFirst',             original: 'first',                  rationale: '"Take First" aligns with the take/limitTo family, making count (one) implicit' },
+  { cat: 'Filtering', custom: 'suppressValues',        original: 'ignoreElements',         rationale: '"Suppress" means actively silencing; "Values" clarifies what is dropped' },
+  { cat: 'Filtering', custom: 'takeLast',              original: 'last',                   rationale: '"Take Last" mirrors takeFirst, forming a symmetric first/last pair' },
+  { cat: 'Filtering', custom: 'snapshotOn',            original: 'sample',                 rationale: '"Snapshot" captures freezing the current value at a specific moment' },
+  { cat: 'Filtering', custom: 'snapshotEvery',         original: 'sampleTime',             rationale: '"Every" signals periodic repetition, distinguishing from signal-triggered snapshotOn' },
+  { cat: 'Filtering', custom: 'exactlyOne',            original: 'single',                 rationale: '"Exactly One" describes both the expected count and the error if violated' },
+  { cat: 'Filtering', custom: 'dropFirst',             original: 'skip',                   rationale: '"Drop First" is the inverse of takeFirst/limitTo, forming an intuitive complement' },
+  { cat: 'Filtering', custom: 'dropLast',              original: 'skipLast',               rationale: '"Drop Last" mirrors dropFirst for the end of the sequence' },
+  { cat: 'Filtering', custom: 'startAfterSignal',      original: 'skipUntil',              rationale: '"Start After Signal" describes enabling the stream from a trigger point onward' },
+  { cat: 'Filtering', custom: 'dropWhile',             original: 'skipWhile',              rationale: '"Drop While" mirrors stopWhenNot (takeWhile), forming a consistent symmetry' },
+  { cat: 'Filtering', custom: 'limitTo',               original: 'take',                   rationale: '"Limit To" describes capping the stream at a maximum count' },
+  { cat: 'Filtering', custom: 'lastN',                 original: 'takeLast',               rationale: '"Last N" is the most direct way to say "final N values before completion"' },
+  { cat: 'Filtering', custom: 'stopWhen',              original: 'takeUntil',              rationale: '"Stop When" describes terminating the stream the moment a condition is met' },
+  { cat: 'Filtering', custom: 'stopWhenNot',           original: 'takeWhile',              rationale: '"Stop When Not" describes halting once the predicate flips to false' },
+  { cat: 'Filtering', custom: 'limitRate',             original: 'throttle',               rationale: '"Limit Rate" describes controlling emission frequency using a signal observable' },
+  { cat: 'Filtering', custom: 'limitRateTo',           original: 'throttleTime',           rationale: '"Rate To" implies a fixed time window, distinguishing from signal-driven limitRate' },
+  // ── Join Creation ───────────────────────────────────────────────────────────
+  { cat: 'Join Creation', custom: 'latestFromAll', original: 'combineLatest', rationale: '"Latest" highlights recency; "From All" makes the multi-source nature clear' },
+  { cat: 'Join Creation', custom: 'runInSequence', original: 'concat',        rationale: '"Run In Sequence" describes serial execution without needing to know what "concat" means' },
+  { cat: 'Join Creation', custom: 'waitForAll',    original: 'forkJoin',      rationale: '"Wait For All" captures the blocking-until-all-complete behavior intuitively' },
+  { cat: 'Join Creation', custom: 'mergeAll',      original: 'merge',         rationale: '"Merge All" preserves familiarity while making concurrent subscription implicit' },
+  { cat: 'Join Creation', custom: 'splitBy',       original: 'partition',     rationale: '"Split" describes dividing into two; "By" indicates a predicate drives the split' },
+  { cat: 'Join Creation', custom: 'firstToEmit',   original: 'race',          rationale: '"First To Emit" describes the winner-takes-all behavior precisely' },
+  { cat: 'Join Creation', custom: 'pairEmissions', original: 'zip',           rationale: '"Pair" describes combining by position; "Emissions" clarifies we work with stream values' },
+  // ── Join ────────────────────────────────────────────────────────────────────
+  { cat: 'Join', custom: 'combineAllLatest', original: 'combineLatestAll', rationale: 'Reordering to "Combine All Latest" reads more naturally as an action sentence' },
+  { cat: 'Join', custom: 'joinSequentially', original: 'concatAll',        rationale: '"Join" unifies the flattening family; "Sequentially" matches the concat naming pattern' },
+  { cat: 'Join', custom: 'joinIfNotBusy',    original: 'exhaustAll',       rationale: '"If Not Busy" mirrors exhaustMap, consistent across the exhaust family' },
+  { cat: 'Join', custom: 'joinConcurrently', original: 'mergeAll',         rationale: '"Join Concurrently" mirrors mergeMap, consistent across the merge family' },
+  { cat: 'Join', custom: 'joinSwitching',    original: 'switchAll',        rationale: '"Switching" mirrors switchMap, consistent across the switch family' },
+  { cat: 'Join', custom: 'prependWith',      original: 'startWith',        rationale: '"Prepend" is the standard term for inserting values at the front of a sequence' },
+  { cat: 'Join', custom: 'pairWithLatest',   original: 'withLatestFrom',   rationale: '"Pair With Latest" describes attaching the most recent snapshot from a secondary stream' },
+  // ── Multicasting ────────────────────────────────────────────────────────────
+  { cat: 'Multicasting', custom: 'shareVia',            original: 'multicast',       rationale: '"Via" indicates routing through a provided Subject, making the mechanism explicit' },
+  { cat: 'Multicasting', custom: 'makeHot',              original: 'publish',         rationale: '"Make Hot" uses the standard cold/hot distinction to describe the conversion' },
+  { cat: 'Multicasting', custom: 'makeHotWithLatest',    original: 'publishBehavior', rationale: '"With Latest" indicates new subscribers receive the most recent value immediately' },
+  { cat: 'Multicasting', custom: 'makeHotWithLastValue', original: 'publishLast',     rationale: '"With Last Value" indicates subscribers receive only the final value on completion' },
+  { cat: 'Multicasting', custom: 'makeHotWithReplay',    original: 'publishReplay',   rationale: '"With Replay" indicates buffered past values are replayed to new subscribers' },
+  { cat: 'Multicasting', custom: 'shareAmong',           original: 'share',           rationale: '"Among" implies distributed sharing across many subscribers' },
+  // ── Error Handling ──────────────────────────────────────────────────────────
+  { cat: 'Error Handling', custom: 'handleError',       original: 'catchError', rationale: '"Handle Error" is the universal software term, understood without RxJS knowledge' },
+  { cat: 'Error Handling', custom: 'tryAgain',          original: 'retry',      rationale: '"Try Again" is the plain-language equivalent, immediately understood by anyone' },
+  { cat: 'Error Handling', custom: 'retryWhenSignaled', original: 'retryWhen',  rationale: '"When Signaled" makes the external-control aspect explicit vs. a count-based retry' },
+  // ── Utility ─────────────────────────────────────────────────────────────────
+  { cat: 'Utility', custom: 'sideEffect',         original: 'tap',           rationale: '"Side Effect" is the precise functional term for actions that don\'t alter the stream' },
+  { cat: 'Utility', custom: 'delayBy',            original: 'delay',         rationale: '"By" suggests a delta shift by an amount, not absolute-time scheduling' },
+  { cat: 'Utility', custom: 'delayUntilSignal',   original: 'delayWhen',     rationale: '"Until Signal" describes waiting for a per-value observable before forwarding' },
+  { cat: 'Utility', custom: 'unwrapNotification', original: 'dematerialize', rationale: '"Unwrap" is the natural inverse of wrap; "Notification" names what is unpacked' },
+  { cat: 'Utility', custom: 'wrapAsNotification', original: 'materialize',   rationale: '"Wrap As Notification" describes boxing every event into a typed container' },
+  { cat: 'Utility', custom: 'scheduleOn',         original: 'observeOn',     rationale: '"Schedule On" describes directing delivery to a specific scheduler' },
+  { cat: 'Utility', custom: 'subscribeUsing',     original: 'subscribeOn',   rationale: '"Using" indicates the scheduler governs how and where subscription starts' },
+  { cat: 'Utility', custom: 'withTimeInterval',   original: 'timeInterval',  rationale: '"With Time Interval" describes attaching elapsed-time as metadata to each value' },
+  { cat: 'Utility', custom: 'withTimestamp',      original: 'timestamp',     rationale: '"With Timestamp" describes attaching a wall-clock time reading to each value' },
+  { cat: 'Utility', custom: 'failAfter',          original: 'timeout',       rationale: '"Fail After" describes erroring out once the time limit is exceeded' },
+  { cat: 'Utility', custom: 'fallbackAfter',      original: 'timeoutWith',   rationale: '"Fallback After" describes switching to an alternative stream on timeout' },
+  { cat: 'Utility', custom: 'collectAll',         original: 'toArray',       rationale: '"All" means the entire stream in one batch, pairing with collectN and collectForDuration' },
+  // ── Conditional & Boolean ───────────────────────────────────────────────────
+  { cat: 'Conditional & Boolean', custom: 'orDefault',       original: 'defaultIfEmpty', rationale: '"Or Default" is the conditional expression pattern: value, or fallback if absent' },
+  { cat: 'Conditional & Boolean', custom: 'allMatch',        original: 'every',          rationale: '"All Match" is standard predicate language for universal quantification' },
+  { cat: 'Conditional & Boolean', custom: 'firstMatch',      original: 'find',           rationale: '"First Match" is the standard description for finding the first satisfying element' },
+  { cat: 'Conditional & Boolean', custom: 'firstMatchIndex', original: 'findIndex',      rationale: '"Index" appended to firstMatch distinguishes position from value' },
+  { cat: 'Conditional & Boolean', custom: 'hasNoValues',     original: 'isEmpty',        rationale: '"Has No Values" is a boolean property that reads naturally as a statement' },
+  // ── Mathematical & Aggregate ────────────────────────────────────────────────
+  { cat: 'Mathematical & Aggregate', custom: 'countValues', original: 'count',  rationale: '"Count Values" adds the object of counting for clarity over the bare verb' },
+  { cat: 'Mathematical & Aggregate', custom: 'maximum',     original: 'max',    rationale: '"Maximum" is the full English word, avoiding single-letter abbreviation' },
+  { cat: 'Mathematical & Aggregate', custom: 'minimum',     original: 'min',    rationale: '"Minimum" is the full English word, matching maximum for symmetry' },
+  { cat: 'Mathematical & Aggregate', custom: 'foldInto',    original: 'reduce', rationale: '"Fold Into" is the functional term for collapsing a sequence to one accumulated value' },
+];
+
+function referenceList(): string {
+  const cats = [...new Set(OPERATORS.map(o => o.cat))];
+  const rows = cats.map(cat => {
+    const items = OPERATORS
+      .filter(o => o.cat === cat)
+      .map(o => `<div class="op-row">
+        <span class="op-custom">${o.custom}</span>
+        <span class="op-arrow">→</span>
+        <span class="op-original">${o.original}</span>
+        <span class="op-rationale">${o.rationale}</span>
+      </div>`).join('');
+    return `<div class="op-cat">${cat}</div>${items}`;
+  }).join('');
+  return `
+<section class="section">
+  <div class="section-header">
+    <h2>All Operators — Name Reference</h2>
+    <p>96 RxJS operators with human-friendly aliases and the rationale for each chosen name.</p>
+  </div>
+  <div class="op-list">${rows}</div>
+</section>`;
+}
+
 // ── live-log helpers ───────────────────────────────────────────────────────────
 
 function ts(): string {
@@ -239,6 +372,8 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <p>Every operator re-exported with a descriptive alias. Import from <code>src/index.ts</code>.</p>
 </header>
 <main>
+
+${referenceList()}
 
 ${section('Transformation', 'Apply functions to reshape, accumulate, or expand emitted values.', [
   card('transformWith', 'map',       `of(1, 2, 3).pipe(\n  transformWith(x => x * 2)\n)`,              r_transformWith),
